@@ -1,8 +1,8 @@
 const crypto = require('crypto');
 
 // Store credentials in environment variables for security
-const ALLOWED_USERNAME = process.env.ALLOWED_USERNAME || 'nour';
-const ALLOWED_PASSWORD = process.env.ALLOWED_PASSWORD || 'nounou358';
+const ALLOWED_USERNAME = process.env.ALLOWED_USERNAME || 'Bouras';
+const ALLOWED_PASSWORD = process.env.ALLOWED_PASSWORD || '00000000';
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-here';
 
 // Simple JWT-like token generation
@@ -133,4 +133,5 @@ exports.handler = async (event, context) => {
             })
         };
     }
+
 };
