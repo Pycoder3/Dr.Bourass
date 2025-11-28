@@ -1,0 +1,1796 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. HAKIM BOURAS - Gastroenterology & Hepatology</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+        
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Montserrat', sans-serif;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .nav-link {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            transform: translateY(-2px);
+        }
+        
+        .nav-link.active {
+            border-bottom: 3px solid #3b82f6;
+            color: #3b82f6;
+        }
+        
+        .time-slot {
+            transition: all 0.2s ease;
+        }
+        
+        .time-slot:hover:not(.booked) {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .time-slot.selected {
+            border: 2px solid #3b82f6;
+            background-color: #eff6ff;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background-color: #10b981;
+            color: white;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .clinic-image {
+            transition: transform 0.3s ease;
+        }
+        
+        .clinic-image:hover {
+            transform: scale(1.03);
+        }
+        
+        .appointment-card {
+            transition: all 0.3s ease;
+        }
+        
+        .appointment-card:hover {
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-5px);
+        }
+        
+        .dashboard-card {
+            transition: all 0.3s ease;
+        }
+        
+        .dashboard-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background-color: #3b82f6;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        
+        .btn-secondary {
+            background-color: #6b7280;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-danger {
+            background-color: #ef4444;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        
+        /* RTL Support for Arabic */
+        [dir="rtl"] body {
+            font-family: 'Tahoma', sans-serif;
+        }
+        
+        [dir="rtl"] .nav-link.active {
+            border-bottom: 3px solid #3b82f6;
+            border-right: none;
+        }
+        
+        /* Language selector styles */
+        .language-selector {
+            position: relative;
+        }
+        
+        .language-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: white;
+            border-radius: 0.375rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            min-width: 120px;
+            display: none;
+        }
+        
+        .language-dropdown.show {
+            display: block;
+        }
+        
+        .language-option {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .language-option:hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Login form styles */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        
+        .login-form {
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        /* Search input styles */
+        .search-container {
+            position: relative;
+        }
+        
+        .search-input {
+            padding-right: 2.5rem;
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <span id="notificationMessage"></span>
+    </div>
+    
+    <!-- Header -->
+    <header class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-user-md text-blue-500 text-2xl mr-3"></i>
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-800" data-translate="site-title">Dr. HAKIM BOURAS</h1>
+                </div>
+                <nav class="hidden md:flex space-x-6 items-center">
+                    <a href="#" class="nav-link active px-3 py-2 text-gray-700 font-medium" data-page="doctor-info" data-translate="nav-doctor-info">Doctor Info</a>
+                    <a href="#" class="nav-link px-3 py-2 text-gray-700 font-medium" data-page="contact" data-translate="nav-contact">Contact</a>
+                    <a href="#" class="nav-link px-3 py-2 text-gray-700 font-medium" data-page="book-appointment" data-translate="nav-book">Book Appointment</a>
+                    
+                    <!-- Search Input -->
+                    <div class="search-container">
+                        <input type="text" id="searchInput" class="search-input px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search...">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    
+                    <!-- Language Selector -->
+                    <div class="language-selector">
+                        <button id="languageBtn" class="flex items-center px-3 py-2 text-gray-700 font-medium">
+                            <i class="fas fa-globe mr-2"></i>
+                            <span id="currentLang">English</span>
+                            <i class="fas fa-chevron-down ml-1 text-xs"></i>
+                        </button>
+                        <div id="languageDropdown" class="language-dropdown">
+                            <div class="language-option" data-lang="en">English</div>
+                            <div class="language-option" data-lang="ar">العربية</div>
+                            <div class="language-option" data-lang="fr">Français</div>
+                        </div>
+                    </div>
+                </nav>
+                <button id="mobileMenuBtn" class="md:hidden text-gray-700 focus:outline-none">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-t">
+            <div class="container mx-auto px-4 py-3 space-y-2">
+                <a href="#" class="block nav-link px-3 py-2 text-gray-700 font-medium" data-page="doctor-info" data-translate="nav-doctor-info">Doctor Info</a>
+                <a href="#" class="block nav-link px-3 py-2 text-gray-700 font-medium" data-page="contact" data-translate="nav-contact">Contact</a>
+                <a href="#" class="block nav-link px-3 py-2 text-gray-700 font-medium" data-page="book-appointment" data-translate="nav-book">Book Appointment</a>
+                
+                <!-- Mobile Search Input -->
+                <div class="search-container px-3 py-2">
+                    <input type="text" id="mobileSearchInput" class="search-input w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search...">
+                    <i class="fas fa-search search-icon"></i>
+                </div>
+                
+                <!-- Mobile Language Selector -->
+                <div class="px-3 py-2">
+                    <div class="flex items-center text-gray-700 font-medium">
+                        <i class="fas fa-globe mr-2"></i>
+                        <span id="currentLangMobile">English</span>
+                    </div>
+                    <div class="mt-2 space-y-1">
+                        <div class="language-option pl-7" data-lang="en">English</div>
+                        <div class="language-option pl-7" data-lang="ar">العربية</div>
+                        <div class="language-option pl-7" data-lang="fr">Français</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-8">
+        <!-- Doctor Info Page -->
+        <div id="doctor-info" class="page active fade-in">
+            <div class="container mx-auto px-4 py-8">
+                <div class="grid md:grid-cols-2 gap-8 mb-8">
+                    <!-- Doctor Image -->
+                    <div class="flex justify-center">
+                        <img src="profile.png" alt="Dr. HAKIM BOURAS" class="rounded-lg shadow-lg w-full max-w-md h-auto object-cover">
+                    </div>
+                    
+                    <!-- Doctor Information -->
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800 mb-4" data-translate="doctor-name">Dr. HAKIM BOURAS</h2>
+                        <div class="mb-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-3" data-translate="doctor-specialty">Gastroenterology and Hepatology</h3>
+                            <div class="bg-white rounded-lg shadow-md p-6">
+                                <div class="space-y-3">
+                                    <div class="flex items-start">
+                                        <i class="fas fa-map-marker-alt text-blue-500 mt-1 mr-3"></i>
+                                        <div>
+                                            <h4 class="font-medium text-gray-800" data-translate="doctor-address-title">Address</h4>
+                                            <p class="text-gray-600 text-sm" data-translate="doctor-address">Residence Chelif, Building No. 94, RDC, Mostaganem</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <i class="fas fa-clock text-blue-500 mt-1 mr-3"></i>
+                                        <div>
+                                            <h4 class="font-medium text-gray-800" data-translate="doctor-hours-title">Working Hours</h4>
+                                            <p class="text-gray-600 text-sm" data-translate="doctor-hours">08:00 AM - 04:00 PM</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+                            <h3 class="text-xl font-semibold text-gray-800 mb-4" data-translate="doctor-description-title">About Clinic</h3>
+                            <p class="text-gray-600" data-translate="doctor-description">The gastroenterology and hepatology clinic of Dr. HAKIM BOURAS, located in Mostaganem, in wilaya of Mostaganem, welcomes you from 08:00 to 16:00, you will find below all the medical procedures and pathologies treated by this establishment.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Map Section -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-4" data-translate="clinic-location">Clinic Location</h3>
+                    <div class="h-96 rounded-md overflow-hidden">
+                        <iframe src="https://www.google.com/maps?q=36.034031,0.1429169&z=15&output=embed" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Login Page -->
+        <div id="login" class="page fade-in">
+            <div class="login-container">
+                <div class="login-form">
+                    <div class="text-center mb-6">
+                        <i class="fas fa-user-md text-blue-500 text-4xl mb-3"></i>
+                        <h2 class="text-2xl font-bold text-gray-800" data-translate="login-title">Doctor Login</h2>
+                        <p class="text-gray-600 mt-2" data-translate="login-subtitle">Enter your credentials to access the dashboard</p>
+                    </div>
+                    
+                    <form id="loginForm">
+                        <div class="mb-4">
+                            <label for="username" class="block text-gray-700 font-medium mb-2" data-translate="username">Username</label>
+                            <input type="text" id="username" name="username" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <div class="mb-6">
+                            <label for="password" class="block text-gray-700 font-medium mb-2" data-translate="password">Password</label>
+                            <input type="password" id="password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        <button type="submit" class="btn-primary text-white font-medium py-2 px-4 rounded-md w-full" data-translate="login-btn">Login</button>
+                        <div class="mt-4 text-center">
+                            <a href="#" id="backToSite" class="text-blue-500 hover:text-blue-700 text-sm" data-translate="back-to-site">← Back to Website</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Contact Us Page -->
+        <div id="contact" class="page fade-in">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6" data-translate="contact-title">Contact Us</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4" data-translate="contact-get-in-touch">Get in Touch</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-start">
+                                <i class="fas fa-map-marker-alt text-blue-500 mt-1 mr-3 text-xl"></i>
+                                <div>
+                                    <h4 class="font-medium text-gray-800" data-translate="contact-address-title">Address</h4>
+                                    <p class="text-gray-600" data-translate="contact-address">Residence Chelif, Building No. 94</p>
+                                    <p class="text-gray-600">RDC, Mostaganem</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-phone text-blue-500 mt-1 mr-3 text-xl"></i>
+                                <div>
+                                    <h4 class="font-medium text-gray-800" data-translate="contact-phone-title">Phone</h4>
+                                    <p class="text-gray-600">+213 55 12 34 56</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-envelope text-blue-500 mt-1 mr-3 text-xl"></i>
+                                <div>
+                                    <h4 class="font-medium text-gray-800" data-translate="contact-email-title">Email</h4>
+                                    <p class="text-gray-600">contact@drbouras.com</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-clock text-blue-500 mt-1 mr-3 text-xl"></i>
+                                <div>
+                                    <h4 class="font-medium text-gray-800" data-translate="contact-hours-title">Working Hours</h4>
+                                    <p class="text-gray-600" data-translate="contact-hours-weekday">Monday - Friday: 08:00 AM - 04:00 PM</p>
+                                    <p class="text-gray-600" data-translate="contact-hours-saturday">Saturday: 09:00 AM - 02:00 PM</p>
+                                    <p class="text-gray-600" data-translate="contact-hours-sunday">Sunday: Closed</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4" data-translate="contact-send-message">Send Us a Message</h3>
+                        <form id="contactForm">
+                            <div class="mb-4">
+                                <label for="contactName" class="block text-gray-700 font-medium mb-2" data-translate="contact-form-name">Your Name</label>
+                                <input type="text" id="contactName" name="contactName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="contactEmail" class="block text-gray-700 font-medium mb-2" data-translate="contact-form-email">Your Email</label>
+                                <input type="email" id="contactEmail" name="contactEmail" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div class="mb-4">
+                                <label for="contactMessage" class="block text-gray-700 font-medium mb-2" data-translate="contact-form-message">Message</label>
+                                <textarea id="contactMessage" name="contactMessage" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary text-white font-medium py-2 px-4 rounded-md" data-translate="contact-form-submit">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="bg-white rounded-lg shadow-md p-6 h-full">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4" data-translate="contact-find-us">Find Us</h3>
+                        <div class="h-96 rounded-md overflow-hidden">
+                            <iframe src="https://www.google.com/maps?q=36.034031,0.1429169&z=15&output=embed" width="100%" height="100%" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Book Appointment Page -->
+        <div id="book-appointment" class="page fade-in">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6" data-translate="book-title">Book an Appointment</h2>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4" data-translate="book-select-date">Select a Date</h3>
+                        <div class="mb-4">
+                            <label for="appointmentDate" class="block text-gray-700 font-medium mb-2" data-translate="book-date-label">Appointment Date</label>
+                            <input type="date" id="appointmentDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div id="dateInfo" class="p-3 bg-blue-50 rounded-md text-blue-700">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <span data-translate="book-date-info">Please select a date to view available time slots</span>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4" data-translate="book-available-slots">Available Time Slots</h3>
+                        <div id="timeSlots" class="grid grid-cols-3 gap-3">
+                            <!-- Time slots will be populated here -->
+                        </div>
+                        <div id="noTimeSlots" class="hidden p-4 bg-yellow-50 rounded-md text-yellow-700">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            <span data-translate="book-no-slots">No time slots available for the selected date</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4" data-translate="book-patient-info">Patient Information</h3>
+                        <form id="appointmentForm">
+                            <div id="selectedTimeInfo" class="hidden mb-4 p-3 bg-green-50 rounded-md text-green-700">
+                                <i class="fas fa-check-circle mr-2"></i>
+                                <span id="selectedTimeText"></span>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="patientName" class="block text-gray-700 font-medium mb-2" data-translate="book-form-name">Full Name</label>
+                                <input type="text" id="patientName" name="patientName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="patientPhone" class="block text-gray-700 font-medium mb-2" data-translate="book-form-phone">Phone Number</label>
+                                <input type="tel" id="patientPhone" name="patientPhone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="block text-gray-700 font-medium mb-2" data-translate="book-form-visit-type">Visit Type</label>
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <input type="radio" id="firstVisit" name="visitType" value="first" class="mr-2" required>
+                                        <label for="firstVisit" class="text-gray-600" data-translate="book-form-first-visit">First Visit</label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="radio" id="followUp" name="visitType" value="followup" class="mr-2" required>
+                                        <label for="followUp" class="text-gray-600" data-translate="book-form-follow-up">Follow-up Visit (requested by doctor)</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="patientNotes" class="block text-gray-700 font-medium mb-2" data-translate="book-form-notes">Additional Notes (Optional)</label>
+                                <textarea id="patientNotes" name="patientNotes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                            
+                            <button type="submit" id="saveAppointmentBtn" class="btn-primary text-white font-medium py-2 px-4 rounded-md w-full" disabled data-translate="book-form-save">Save Appointment</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Doctor Dashboard -->
+        <div id="dashboard" class="page fade-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-bold text-gray-800" data-translate="dashboard-title">Doctor Dashboard</h2>
+                <button id="logoutBtn" class="btn-secondary text-white font-medium py-2 px-4 rounded-md">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    <span data-translate="logout">Logout</span>
+                </button>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-6 mb-8">
+                <div class="dashboard-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800" data-translate="dashboard-total-appointments">Total Appointments</h3>
+                        <i class="fas fa-calendar-check text-blue-500 text-2xl"></i>
+                    </div>
+                    <p id="totalAppointments" class="text-3xl font-bold text-gray-800">0</p>
+                </div>
+                
+                <div class="dashboard-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800" data-translate="dashboard-today-appointments">Today's Appointments</h3>
+                        <i class="fas fa-calendar-day text-green-500 text-2xl"></i>
+                    </div>
+                    <p id="todayAppointments" class="text-3xl font-bold text-gray-800">0</p>
+                </div>
+                
+                <div class="dashboard-card bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-800" data-translate="dashboard-available-slots">Available Time Slots</h3>
+                        <i class="fas fa-clock text-purple-500 text-2xl"></i>
+                    </div>
+                    <p id="availableSlots" class="text-3xl font-bold text-gray-800">0</p>
+                </div>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div>
+                    <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-semibold text-gray-800" data-translate="dashboard-manage-slots">Manage Time Slots</h3>
+                            <button id="addTimeSlotBtn" class="btn-primary text-white font-medium py-2 px-4 rounded-md text-sm">
+                                <i class="fas fa-plus mr-2"></i>
+                                <span data-translate="dashboard-add-slot">Add Time Slot</span>
+                            </button>
+                        </div>
+                        
+                        <div id="timeSlotForm" class="hidden mb-4 p-4 bg-gray-50 rounded-md">
+                            <h4 class="font-medium text-gray-800 mb-3" data-translate="dashboard-add-new-slot">Add New Time Slot</h4>
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label for="slotDate" class="block text-gray-700 text-sm font-medium mb-1" data-translate="dashboard-slot-date">Date</label>
+                                    <input type="date" id="slotDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="slotTime" class="block text-gray-700 text-sm font-medium mb-1" data-translate="dashboard-slot-time">Time</label>
+                                    <input type="time" id="slotTime" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button id="saveTimeSlotBtn" class="btn-primary text-white font-medium py-2 px-4 rounded-md text-sm" data-translate="dashboard-save">Save</button>
+                                <button id="cancelTimeSlotBtn" class="btn-secondary text-white font-medium py-2 px-4 rounded-md text-sm" data-translate="dashboard-cancel">Cancel</button>
+                            </div>
+                        </div>
+                        
+                        <div id="timeSlotsList" class="space-y-2 max-h-96 overflow-y-auto">
+                            <!-- Time slots will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-semibold text-gray-800" data-translate="dashboard-add-manual">Add Manual Appointment</h3>
+                        </div>
+                        <form id="manualAppointmentForm">
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <div>
+                                    <label for="manualDate" class="block text-gray-700 text-sm font-medium mb-1" data-translate="dashboard-manual-date">Date</label>
+                                    <input type="date" id="manualDate" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+                                <div>
+                                    <label for="manualTime" class="block text-gray-700 text-sm font-medium mb-1" data-translate="dashboard-manual-time">Time</label>
+                                    <input type="time" id="manualTime" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="manualName" class="block text-gray-700 text-sm font-medium mb-1" data-translate="dashboard-manual-name">Patient Name</label>
+                                <input type="text" id="manualName" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="manualPhone" class="block text-gray-700 text-sm font-medium mb-1" data-translate="dashboard-manual-phone">Phone Number</label>
+                                <input type="tel" id="manualPhone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="block text-gray-700 text-sm font-medium mb-1" data-translate="dashboard-manual-visit-type">Visit Type</label>
+                                <select id="manualVisitType" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                                    <option value="first" data-translate="dashboard-manual-first-visit">First Visit</option>
+                                    <option value="followup" data-translate="dashboard-manual-follow-up">Follow-up Visit</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="manualNotes" class="block text-gray-700 text-sm font-medium mb-1" data-translate="dashboard-manual-notes">Notes</label>
+                                <textarea id="manualNotes" rows="2" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+                            <button type="submit" class="btn-primary text-white font-medium py-2 px-4 rounded-md w-full" data-translate="dashboard-manual-add">Add Appointment</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="bg-white rounded-lg shadow-md p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-4" data-translate="dashboard-all-appointments">All Appointments</h3>
+                        <div id="appointmentsList" class="space-y-3 max-h-96 overflow-y-auto">
+                            <!-- Appointments will be populated here -->
+                        </div>
+                        <div id="noAppointments" class="hidden p-4 bg-gray-50 rounded-md text-gray-700 text-center">
+                            <i class="fas fa-calendar-times text-4xl mb-3 text-gray-400"></i>
+                            <p data-translate="dashboard-no-appointments">No appointments scheduled</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="grid md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-3" data-translate="footer-doctor-name">Dr. HAKIM BOURAS</h3>
+                    <p class="text-gray-300" data-translate="footer-doctor-desc">Gastroenterology and Hepatology specialist dedicated to providing personalized care for all patients.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-3" data-translate="footer-quick-links">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="footer-link text-gray-300 hover:text-white transition" data-page="doctor-info" data-translate="footer-doctor-info">Doctor Info</a></li>
+                        <li><a href="#" class="footer-link text-gray-300 hover:text-white transition" data-page="contact" data-translate="footer-contact">Contact</a></li>
+                        <li><a href="#" class="footer-link text-gray-300 hover:text-white transition" data-page="book-appointment" data-translate="footer-book">Book Appointment</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-3" data-translate="footer-contact-info">Contact Info</h3>
+                    <ul class="space-y-2 text-gray-300">
+                        <li><i class="fas fa-map-marker-alt mr-2"></i><span data-translate="footer-address">Residence Chelif, Building No. 94, Mostaganem</span></li>
+                        <li><i class="fas fa-phone mr-2"></i>+213 55 12 34 56</li>
+                        <li><i class="fas fa-envelope mr-2"></i>contact@drbouras.com</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-gray-400">
+                <p data-translate="footer-copyright">&copy; 2023 Dr. HAKIM BOURAS. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Translation dictionary
+        const translations = {
+            en: {
+                "site-title": "Dr. HAKIM BOURAS",
+                "nav-doctor-info": "Doctor Info",
+                "nav-contact": "Contact",
+                "nav-book": "Book Appointment",
+                "doctor-login": "Doctor Login",
+                "login-title": "Doctor Login",
+                "login-subtitle": "Enter your credentials to access the dashboard",
+                "username": "Username",
+                "password": "Password",
+                "login-btn": "Login",
+                "back-to-site": "← Back to Website",
+                "doctor-name": "Dr. HAKIM BOURAS",
+                "doctor-specialty": "Gastroenterology and Hepatology",
+                "doctor-address-title": "Address",
+                "doctor-address": "Residence Chelif, Building No. 94, RDC, Mostaganem",
+                "doctor-hours-title": "Working Hours",
+                "doctor-hours": "08:00 AM - 04:00 PM",
+                "doctor-description-title": "About Clinic",
+                "doctor-description": "The gastroenterology and hepatology clinic of Dr. HAKIM BOURAS, located in Mostaganem, in wilaya of Mostaganem, welcomes you from 08:00 to 16:00, you will find below all the medical procedures and pathologies treated by this establishment.",
+                "clinic-location": "Clinic Location",
+                "contact-title": "Contact Us",
+                "contact-get-in-touch": "Get in Touch",
+                "contact-address-title": "Address",
+                "contact-address": "Residence Chelif, Building No. 94",
+                "contact-phone-title": "Phone",
+                "contact-email-title": "Email",
+                "contact-hours-title": "Working Hours",
+                "contact-hours-weekday": "Monday - Friday: 08:00 AM - 04:00 PM",
+                "contact-hours-saturday": "Saturday: 09:00 AM - 02:00 PM",
+                "contact-hours-sunday": "Sunday: Closed",
+                "contact-send-message": "Send Us a Message",
+                "contact-find-us": "Find Us",
+                "contact-form-name": "Your Name",
+                "contact-form-email": "Your Email",
+                "contact-form-message": "Message",
+                "contact-form-submit": "Send Message",
+                "book-title": "Book an Appointment",
+                "book-select-date": "Select a Date",
+                "book-date-label": "Appointment Date",
+                "book-date-info": "Please select a date to view available time slots",
+                "book-available-slots": "Available Time Slots",
+                "book-no-slots": "No time slots available for the selected date",
+                "book-patient-info": "Patient Information",
+                "book-form-name": "Full Name",
+                "book-form-phone": "Phone Number",
+                "book-form-visit-type": "Visit Type",
+                "book-form-first-visit": "First Visit",
+                "book-form-follow-up": "Follow-up Visit (requested by doctor)",
+                "book-form-notes": "Additional Notes (Optional)",
+                "book-form-save": "Save Appointment",
+                "dashboard-title": "Doctor Dashboard",
+                "logout": "Logout",
+                "dashboard-total-appointments": "Total Appointments",
+                "dashboard-today-appointments": "Today's Appointments",
+                "dashboard-available-slots": "Available Time Slots",
+                "dashboard-manage-slots": "Manage Time Slots",
+                "dashboard-add-slot": "Add Time Slot",
+                "dashboard-add-new-slot": "Add New Time Slot",
+                "dashboard-slot-date": "Date",
+                "dashboard-slot-time": "Time",
+                "dashboard-save": "Save",
+                "dashboard-cancel": "Cancel",
+                "dashboard-add-manual": "Add Manual Appointment",
+                "dashboard-manual-date": "Date",
+                "dashboard-manual-time": "Time",
+                "dashboard-manual-name": "Patient Name",
+                "dashboard-manual-phone": "Phone Number",
+                "dashboard-manual-visit-type": "Visit Type",
+                "dashboard-manual-first-visit": "First Visit",
+                "dashboard-manual-follow-up": "Follow-up Visit",
+                "dashboard-manual-notes": "Notes",
+                "dashboard-manual-add": "Add Appointment",
+                "dashboard-all-appointments": "All Appointments",
+                "dashboard-no-appointments": "No appointments scheduled",
+                "footer-doctor-name": "Dr. HAKIM BOURAS",
+                "footer-doctor-desc": "Gastroenterology and Hepatology specialist dedicated to providing personalized care for all patients.",
+                "footer-quick-links": "Quick Links",
+                "footer-doctor-info": "Doctor Info",
+                "footer-contact": "Contact",
+                "footer-book": "Book Appointment",
+                "footer-contact-info": "Contact Info",
+                "footer-address": "Residence Chelif, Building No. 94, Mostaganem",
+                "footer-copyright": "&copy; 2023 Dr. HAKIM BOURAS. All rights reserved."
+            },
+            ar: {
+                "site-title": "د. حكيم بوراس",
+                "nav-doctor-info": "معلومات الطبيب",
+                "nav-contact": "اتصل بنا",
+                "nav-book": "حجز موعد",
+                "doctor-login": "تسجيل دخول الطبيب",
+                "login-title": "تسجيل دخول الطبيب",
+                "login-subtitle": "أدخل بيانات الاعتماد الخاصة بك للوصول إلى لوحة التحكم",
+                "username": "اسم المستخدم",
+                "password": "كلمة المرور",
+                "login-btn": "تسجيل الدخول",
+                "back-to-site": "← العودة إلى الموقع",
+                "doctor-name": "د. حكيم بوراس",
+                "doctor-specialty": "أمراض الجهاز الهضمي والكبد",
+                "doctor-address-title": "العنوان",
+                "doctor-address": "سكن الشلف، مبنى رقم 94، طابق أرضي، مستغانم",
+                "doctor-hours-title": "ساعات العمل",
+                "doctor-hours": "08:00 صباحًا - 04:00 مساءً",
+                "doctor-description-title": "عن العيادة",
+                "doctor-description": "عيادة أمراض الجهاز الهضمي والكبد للدكتور حكيم بوراس، تقع في مستغانم، في ولاية مستغانم، تستقبلكم من الساعة 08:00 صباحًا إلى 16:00 مساءً، فيما يلي جميع الإجراءات الطبية والأمراض المعالجة في هذا المركز.",
+                "clinic-location": "موقع العيادة",
+                "contact-title": "اتصل بنا",
+                "contact-get-in-touch": "تواصل معنا",
+                "contact-address-title": "العنوان",
+                "contact-address": "سكن الشلف، مبنى رقم 94",
+                "contact-phone-title": "الهاتف",
+                "contact-email-title": "البريد الإلكتروني",
+                "contact-hours-title": "ساعات العمل",
+                "contact-hours-weekday": "الإثنين - الجمعة: 08:00 صباحًا - 04:00 مساءً",
+                "contact-hours-saturday": "السبت: 09:00 صباحًا - 02:00 مساءً",
+                "contact-hours-sunday": "الأحد: مغلق",
+                "contact-send-message": "أرسل لنا رسالة",
+                "contact-find-us": "اعثر علينا",
+                "contact-form-name": "اسمك",
+                "contact-form-email": "بريدك الإلكتروني",
+                "contact-form-message": "الرسالة",
+                "contact-form-submit": "إرسال الرسالة",
+                "book-title": "حجز موعد",
+                "book-select-date": "اختر تاريخًا",
+                "book-date-label": "تاريخ الموعد",
+                "book-date-info": "يرجى تحديد تاريخ لعرض الأوقات المتاحة",
+                "book-available-slots": "الأوقات المتاحة",
+                "book-no-slots": "لا توجد أوقات متاحة للتاريخ المحدد",
+                "book-patient-info": "معلومات المريض",
+                "book-form-name": "الاسم الكامل",
+                "book-form-phone": "رقم الهاتف",
+                "book-form-visit-type": "نوع الزيارة",
+                "book-form-first-visit": "زيارة أولى",
+                "book-form-follow-up": "زيارة متابعة (بناءً على طلب الطبيب)",
+                "book-form-notes": "ملاحظات إضافية (اختياري)",
+                "book-form-save": "حفظ الموعد",
+                "dashboard-title": "لوحة تحكم الطبيب",
+                "logout": "تسجيل الخروج",
+                "dashboard-total-appointments": "إجمالي المواعيد",
+                "dashboard-today-appointments": "مواعيد اليوم",
+                "dashboard-available-slots": "الأوقات المتاحة",
+                "dashboard-manage-slots": "إدارة الأوقات",
+                "dashboard-add-slot": "إضافة وقت",
+                "dashboard-add-new-slot": "إضافة وقت جديد",
+                "dashboard-slot-date": "التاريخ",
+                "dashboard-slot-time": "الوقت",
+                "dashboard-save": "حفظ",
+                "dashboard-cancel": "إلغاء",
+                "dashboard-add-manual": "إضافة موعد يدوي",
+                "dashboard-manual-date": "التاريخ",
+                "dashboard-manual-time": "الوقت",
+                "dashboard-manual-name": "اسم المريض",
+                "dashboard-manual-phone": "رقم الهاتف",
+                "dashboard-manual-visit-type": "نوع الزيارة",
+                "dashboard-manual-first-visit": "زيارة أولى",
+                "dashboard-manual-follow-up": "زيارة متابعة",
+                "dashboard-manual-notes": "ملاحظات",
+                "dashboard-manual-add": "إضافة موعد",
+                "dashboard-all-appointments": "جميع المواعيد",
+                "dashboard-no-appointments": "لا توجد مواعيد مجدولة",
+                "footer-doctor-name": "د. حكيم بوراس",
+                "footer-doctor-desc": "أخصائي أمراض الجهاز الهضمي والكبد مكرس لتقديم رعاية شخصية لجميع المرضى.",
+                "footer-quick-links": "روابط سريعة",
+                "footer-doctor-info": "معلومات الطبيب",
+                "footer-contact": "اتصل بنا",
+                "footer-book": "حجز موعد",
+                "footer-contact-info": "معلومات الاتصال",
+                "footer-address": "سكن الشلف، مبنى رقم 94، مستغانم",
+                "footer-copyright": "&copy; 2023 د. حكيم بوراس. جميع الحقوق محفوظة."
+            },
+            fr: {
+                "site-title": "Dr. HAKIM BOURAS",
+                "nav-doctor-info": "Informations du Médecin",
+                "nav-contact": "Contact",
+                "nav-book": "Prendre Rendez-vous",
+                "doctor-login": "Connexion Médecin",
+                "login-title": "Connexion Médecin",
+                "login-subtitle": "Entrez vos identifiants pour accéder au tableau de bord",
+                "username": "Nom d'utilisateur",
+                "password": "Mot de passe",
+                "login-btn": "Connexion",
+                "back-to-site": "← Retour au site",
+                "doctor-name": "Dr. HAKIM BOURAS",
+                "doctor-specialty": "Gastro-entérologie et Hépatologie",
+                "doctor-address-title": "Adresse",
+                "doctor-address": "Résidence Chelif, Bâtiment n°94, RDC, Mostaganem",
+                "doctor-hours-title": "Heures de Travail",
+                "doctor-hours": "08:00h - 16:00h",
+                "doctor-description-title": "À propos du Cabinet",
+                "doctor-description": "Le cabinet de Gastro entérologie et hépatologie du docteur HAKIM BOURAS, localisé à MOSTAGANEM, dans la wilaya de MOSTAGANEM vous accueille de 08:00h à 16:00h, vous trouverez ci-dessous tous les actes pratiqués et les pathologies traitées par cet établissement.",
+                "clinic-location": "Localisation du Cabinet",
+                "contact-title": "Contactez-nous",
+                "contact-get-in-touch": "Contactez-nous",
+                "contact-address-title": "Adresse",
+                "contact-address": "Résidence Chelif, Bâtiment n°94",
+                "contact-phone-title": "Téléphone",
+                "contact-email-title": "Email",
+                "contact-hours-title": "Heures de Travail",
+                "contact-hours-weekday": "Lundi - Vendredi: 08:00h - 16:00h",
+                "contact-hours-saturday": "Samedi: 09:00h - 14:00h",
+                "contact-hours-sunday": "Dimanche: Fermé",
+                "contact-send-message": "Envoyez-nous un Message",
+                "contact-find-us": "Trouvez-nous",
+                "contact-form-name": "Votre Nom",
+                "contact-form-email": "Votre Email",
+                "contact-form-message": "Message",
+                "contact-form-submit": "Envoyer le Message",
+                "book-title": "Prendre un Rendez-vous",
+                "book-select-date": "Sélectionner une Date",
+                "book-date-label": "Date du Rendez-vous",
+                "book-date-info": "Veuillez sélectionner une date pour voir les créneaux disponibles",
+                "book-available-slots": "Créneaux Disponibles",
+                "book-no-slots": "Aucun créneau disponible pour la date sélectionnée",
+                "book-patient-info": "Informations du Patient",
+                "book-form-name": "Nom Complet",
+                "book-form-phone": "Numéro de Téléphone",
+                "book-form-visit-type": "Type de Visite",
+                "book-form-first-visit": "Première Visite",
+                "book-form-follow-up": "Visite de Suivi (demandée par le médecin)",
+                "book-form-notes": "Notes Supplémentaires (Optionnel)",
+                "book-form-save": "Enregistrer le Rendez-vous",
+                "dashboard-title": "Tableau de Bord du Médecin",
+                "logout": "Déconnexion",
+                "dashboard-total-appointments": "Total des Rendez-vous",
+                "dashboard-today-appointments": "Rendez-vous d'Aujourd'hui",
+                "dashboard-available-slots": "Créneaux Disponibles",
+                "dashboard-manage-slots": "Gérer les Créneaux",
+                "dashboard-add-slot": "Ajouter un Créneau",
+                "dashboard-add-new-slot": "Ajouter un Nouveau Créneau",
+                "dashboard-slot-date": "Date",
+                "dashboard-slot-time": "Heure",
+                "dashboard-save": "Enregistrer",
+                "dashboard-cancel": "Annuler",
+                "dashboard-add-manual": "Ajouter un Rendez-vous Manuel",
+                "dashboard-manual-date": "Date",
+                "dashboard-manual-time": "Heure",
+                "dashboard-manual-name": "Nom du Patient",
+                "dashboard-manual-phone": "Numéro de Téléphone",
+                "dashboard-manual-visit-type": "Type de Visite",
+                "dashboard-manual-first-visit": "Première Visite",
+                "dashboard-manual-follow-up": "Visite de Suivi",
+                "dashboard-manual-notes": "Notes",
+                "dashboard-manual-add": "Ajouter un Rendez-vous",
+                "dashboard-all-appointments": "Tous les Rendez-vous",
+                "dashboard-no-appointments": "Aucun rendez-vous programmé",
+                "footer-doctor-name": "Dr. HAKIM BOURAS",
+                "footer-doctor-desc": "Spécialiste en Gastro-entérologie et Hépatologie dédié à fournir des soins personnalisés à tous les patients.",
+                "footer-quick-links": "Liens Rapides",
+                "footer-doctor-info": "Informations du Médecin",
+                "footer-contact": "Contact",
+                "footer-book": "Prendre Rendez-vous",
+                "footer-contact-info": "Infos de Contact",
+                "footer-address": "Résidence Chelif, Bâtiment n°94, Mostaganem",
+                "footer-copyright": "&copy; 2023 Dr. HAKIM BOURAS. Tous droits réservés."
+            }
+        };
+        
+        // Initialize data structure
+        let appointments = [];
+        let timeSlots = [];
+        let selectedTimeSlot = null;
+        let currentLanguage = 'en';
+        let isAuthenticated = false;
+        
+        // API Configuration
+        const API_BASE_URL = '/api';
+        let authToken = localStorage.getItem('authToken') || null;
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load data from localStorage
+            loadDataFromStorage();
+            
+            // Check authentication status
+            checkAuthentication();
+            
+            // Initialize time slots for the next 7 days
+            initializeTimeSlots();
+            
+            // Set up navigation
+            setupNavigation();
+            
+            // Set up event listeners
+            setupEventListeners();
+            
+            // Set up language selector
+            setupLanguageSelector();
+            
+            // Set up search functionality
+            setupSearch();
+            
+            // Update dashboard
+            updateDashboard();
+            
+            // Set minimum date for appointment booking to today
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('appointmentDate').min = today;
+            document.getElementById('slotDate').min = today;
+            document.getElementById('manualDate').min = today;
+        });
+        
+        // Check authentication status
+        async function checkAuthentication() {
+            if (!authToken) {
+                isAuthenticated = false;
+                showPage('doctor-info');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/check-auth`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token: authToken })
+                });
+                
+                const data = await response.json();
+                
+                if (data.authenticated) {
+                    isAuthenticated = true;
+                    showPage('doctor-info');
+                } else {
+                    isAuthenticated = false;
+                    localStorage.removeItem('authToken');
+                    showPage('doctor-info');
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                isAuthenticated = false;
+                showPage('doctor-info');
+            }
+        }
+        
+        // Login function
+        async function login(username, password) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    authToken = data.token;
+                    localStorage.setItem('authToken', authToken);
+                    isAuthenticated = true;
+                    showPage('dashboard');
+                    showNotification(getTranslation('login-success', 'Login successful!'));
+                    return true;
+                } else {
+                    showNotification(data.message || 'Login failed', 'error');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                // Fallback to local authentication for demo
+                if (username === 'nour' && password === 'nounou358') {
+                    authToken = 'demo-token';
+                    localStorage.setItem('authToken', authToken);
+                    isAuthenticated = true;
+                    showPage('dashboard');
+                    showNotification(getTranslation('login-success', 'Login successful!'));
+                    return true;
+                } else {
+                    showNotification(getTranslation('login-error', 'Login failed. Please try again.'), 'error');
+                    return false;
+                }
+            }
+        }
+        
+        // Logout function
+        function logout() {
+            authToken = null;
+            localStorage.removeItem('authToken');
+            isAuthenticated = false;
+            showPage('doctor-info');
+        }
+        
+        // Load data from localStorage
+        function loadDataFromStorage() {
+            const storedAppointments = localStorage.getItem('appointments');
+            const storedTimeSlots = localStorage.getItem('timeSlots');
+            const storedLanguage = localStorage.getItem('currentLanguage');
+            
+            if (storedAppointments) {
+                appointments = JSON.parse(storedAppointments);
+            }
+            
+            if (storedTimeSlots) {
+                timeSlots = JSON.parse(storedTimeSlots);
+            }
+            
+            if (storedLanguage) {
+                currentLanguage = storedLanguage;
+                updateLanguage(currentLanguage);
+            }
+        }
+        
+        // Save data to localStorage
+        function saveDataToStorage() {
+            localStorage.setItem('appointments', JSON.stringify(appointments));
+            localStorage.setItem('timeSlots', JSON.stringify(timeSlots));
+            localStorage.setItem('currentLanguage', currentLanguage);
+            localStorage.setItem('authToken', authToken);
+        }
+        
+        // Initialize time slots for the next 7 days
+        function initializeTimeSlots() {
+            // Only initialize if there are no time slots
+            if (timeSlots.length === 0) {
+                const today = new Date();
+                const timeOptions = [
+                    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
+                    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30'
+                ];
+                
+                // Generate time slots for the next 7 days (excluding Sundays)
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(today);
+                    date.setDate(today.getDate() + i);
+                    
+                    // Skip Sundays
+                    if (date.getDay() !== 0) {
+                        const dateStr = date.toISOString().split('T')[0];
+                        
+                        timeOptions.forEach(time => {
+                            timeSlots.push({
+                                id: generateId(),
+                                date: dateStr,
+                                time: time,
+                                available: true
+                            });
+                        });
+                    }
+                }
+                
+                saveDataToStorage();
+            }
+            
+            // Update time slots list in dashboard
+            updateTimeSlotsList();
+        }
+        
+        // Generate a unique ID
+        function generateId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2);
+        }
+        
+        // Set up navigation
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('.nav-link');
+            const footerLinks = document.querySelectorAll('.footer-link');
+            
+            // Main navigation
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetPage = this.getAttribute('data-page');
+                    
+                    // Check if trying to access dashboard without authentication
+                    if (targetPage === 'dashboard' && !isAuthenticated) {
+                        showPage('login');
+                        return;
+                    }
+                    
+                    showPage(targetPage);
+                    
+                    // Update active nav link
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    navLinks.forEach(l => {
+                        if (l.getAttribute('data-page') === targetPage) {
+                            l.classList.add('active');
+                        }
+                    });
+                    
+                    // Close mobile menu if open
+                    document.getElementById('mobileMenu').classList.add('hidden');
+                });
+            });
+            
+            // Footer navigation
+            footerLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetPage = this.getAttribute('data-page');
+                    showPage(targetPage);
+                    
+                    // Update active nav link
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    navLinks.forEach(l => {
+                        if (l.getAttribute('data-page') === targetPage) {
+                            l.classList.add('active');
+                        }
+                    });
+                    
+                    // Close mobile menu if open
+                    document.getElementById('mobileMenu').classList.add('hidden');
+                });
+            });
+            
+            // Back to site link
+            document.getElementById('backToSite').addEventListener('click', function(e) {
+                e.preventDefault();
+                showPage('doctor-info');
+            });
+            
+            // Logout button
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                logout();
+            });
+            
+            // Mobile menu toggle
+            document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+                document.getElementById('mobileMenu').classList.toggle('hidden');
+            });
+        }
+        
+        // Show a specific page
+        function showPage(pageId) {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            document.getElementById(pageId).classList.add('active');
+            
+            // Update dashboard when showing it
+            if (pageId === 'dashboard') {
+                updateDashboard();
+                updateTimeSlotsList();
+                updateAppointmentsList();
+            }
+        }
+        
+        // Set up event listeners
+        function setupEventListeners() {
+            // Login form submission
+            document.getElementById('loginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                const success = await login(username, password);
+                
+                if (success) {
+                    this.reset();
+                }
+            });
+            
+            // Appointment date change
+            document.getElementById('appointmentDate').addEventListener('change', function() {
+                const selectedDate = this.value;
+                displayTimeSlots(selectedDate);
+            });
+            
+            // Appointment form submission
+            document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                saveAppointment();
+            });
+            
+            // Contact form submission
+            document.getElementById('contactForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                showNotification(getTranslation('contact-success', 'Your message has been sent successfully!'));
+                this.reset();
+            });
+            
+            // Add time slot button
+            document.getElementById('addTimeSlotBtn').addEventListener('click', function() {
+                document.getElementById('timeSlotForm').classList.toggle('hidden');
+            });
+            
+            // Save time slot button
+            document.getElementById('saveTimeSlotBtn').addEventListener('click', function() {
+                const date = document.getElementById('slotDate').value;
+                const time = document.getElementById('slotTime').value;
+                
+                if (date && time) {
+                    addTimeSlot(date, time);
+                    document.getElementById('timeSlotForm').classList.add('hidden');
+                    document.getElementById('slotDate').value = '';
+                    document.getElementById('slotTime').value = '';
+                }
+            });
+            
+            // Cancel time slot button
+            document.getElementById('cancelTimeSlotBtn').addEventListener('click', function() {
+                document.getElementById('timeSlotForm').classList.add('hidden');
+                document.getElementById('slotDate').value = '';
+                document.getElementById('slotTime').value = '';
+            });
+            
+            // Manual appointment form submission
+            document.getElementById('manualAppointmentForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addManualAppointment();
+            });
+        }
+        
+        // Set up search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const mobileSearchInput = document.getElementById('mobileSearchInput');
+            
+            function handleSearch(input) {
+                input.addEventListener('input', function() {
+                    const value = this.value.trim();
+                    
+                    // Check if user typed "35"
+                    if (value === '35') {
+                        showPage('login');
+                        this.value = ''; // Clear the search input
+                        showNotification(getTranslation('search-login', 'Redirecting to login page...'));
+                    }
+                });
+            }
+            
+            handleSearch(searchInput);
+            handleSearch(mobileSearchInput);
+        }
+        
+        // Set up language selector
+        function setupLanguageSelector() {
+            const languageBtn = document.getElementById('languageBtn');
+            const languageDropdown = document.getElementById('languageDropdown');
+            const currentLangSpan = document.getElementById('currentLang');
+            const currentLangMobile = document.getElementById('currentLangMobile');
+            
+            // Toggle dropdown
+            languageBtn.addEventListener('click', function() {
+                languageDropdown.classList.toggle('show');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!languageBtn.contains(e.target) && !languageDropdown.contains(e.target)) {
+                    languageDropdown.classList.remove('show');
+                }
+            });
+            
+            // Language options
+            const languageOptions = document.querySelectorAll('.language-option');
+            languageOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const lang = this.getAttribute('data-lang');
+                    currentLanguage = lang;
+                    updateLanguage(lang);
+                    saveDataToStorage();
+                    
+                    // Update current language display
+                    const langText = this.textContent;
+                    currentLangSpan.textContent = langText;
+                    currentLangMobile.textContent = langText;
+                    
+                    // Close dropdown
+                    languageDropdown.classList.remove('show');
+                });
+            });
+            
+            // Set initial language display
+            const initialLangText = document.querySelector(`.language-option[data-lang="${currentLanguage}"]`).textContent;
+            currentLangSpan.textContent = initialLangText;
+            currentLangMobile.textContent = initialLangText;
+        }
+        
+        // Update language
+        function updateLanguage(lang) {
+            // Update HTML lang and dir attributes
+            document.documentElement.lang = lang;
+            document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            
+            // Update all elements with data-translate attribute
+            const elements = document.querySelectorAll('[data-translate]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                const translation = translations[lang][key];
+                
+                if (translation) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                        element.placeholder = translation;
+                    } else if (element.tagName === 'OPTION') {
+                        element.textContent = translation;
+                    } else {
+                        element.textContent = translation;
+                    }
+                }
+            });
+        }
+        
+        // Get translation
+        function getTranslation(key, fallback) {
+            return translations[currentLanguage][key] || fallback;
+        }
+        
+        // Display time slots for a specific date
+        function displayTimeSlots(date) {
+            const timeSlotsContainer = document.getElementById('timeSlots');
+            const noTimeSlotsMsg = document.getElementById('noTimeSlots');
+            
+            // Clear existing time slots
+            timeSlotsContainer.innerHTML = '';
+            
+            // Filter time slots for the selected date
+            const slotsForDate = timeSlots.filter(slot => slot.date === date);
+            
+            if (slotsForDate.length === 0) {
+                noTimeSlotsMsg.classList.remove('hidden');
+                return;
+            }
+            
+            noTimeSlotsMsg.classList.add('hidden');
+            
+            // Create time slot elements
+            slotsForDate.forEach(slot => {
+                const slotElement = document.createElement('div');
+                slotElement.className = `time-slot p-3 rounded-md text-center cursor-pointer ${
+                    slot.available ? 'bg-green-100 text-green-800 hover:bg-green-200' : 'bg-red-100 text-red-800 cursor-not-allowed'
+                }`;
+                slotElement.textContent = slot.time;
+                slotElement.dataset.slotId = slot.id;
+                
+                if (slot.available) {
+                    slotElement.addEventListener('click', function() {
+                        selectTimeSlot(slot);
+                    });
+                }
+                
+                timeSlotsContainer.appendChild(slotElement);
+            });
+        }
+        
+        // Select a time slot
+        function selectTimeSlot(slot) {
+            // Update UI
+            const timeSlotElements = document.querySelectorAll('.time-slot');
+            timeSlotElements.forEach(element => {
+                element.classList.remove('selected');
+            });
+            
+            const selectedElement = document.querySelector(`[data-slot-id="${slot.id}"]`);
+            if (selectedElement) {
+                selectedElement.classList.add('selected');
+            }
+            
+            // Store selected slot
+            selectedTimeSlot = slot;
+            
+            // Update selected time info
+            const selectedTimeInfo = document.getElementById('selectedTimeInfo');
+            const selectedTimeText = document.getElementById('selectedTimeText');
+            const dateObj = new Date(slot.date);
+            const formattedDate = dateObj.toLocaleDateString(currentLanguage === 'en' ? 'en-US' : currentLanguage === 'ar' ? 'ar-SA' : 'fr-FR', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            selectedTimeText.textContent = `${getTranslation('book-selected', 'Selected')}: ${formattedDate} at ${slot.time}`;
+            selectedTimeInfo.classList.remove('hidden');
+            
+            // Enable save button
+            document.getElementById('saveAppointmentBtn').disabled = false;
+        }
+        
+        // Save appointment
+        function saveAppointment() {
+            if (!selectedTimeSlot) {
+                showNotification(getTranslation('book-select-slot', 'Please select a time slot'), 'error');
+                return;
+            }
+            
+            const name = document.getElementById('patientName').value;
+            const phone = document.getElementById('patientPhone').value;
+            const visitType = document.querySelector('input[name="visitType"]:checked').value;
+            const notes = document.getElementById('patientNotes').value;
+            
+            // Create appointment object
+            const appointment = {
+                id: generateId(),
+                date: selectedTimeSlot.date,
+                time: selectedTimeSlot.time,
+                patientName: name,
+                patientPhone: phone,
+                visitType: visitType,
+                notes: notes,
+                source: 'website',
+                createdAt: new Date().toISOString()
+            };
+            
+            // Add to appointments array
+            appointments.push(appointment);
+            
+            // Update time slot availability
+            const slotIndex = timeSlots.findIndex(slot => slot.id === selectedTimeSlot.id);
+            if (slotIndex !== -1) {
+                timeSlots[slotIndex].available = false;
+            }
+            
+            // Save to localStorage
+            saveDataToStorage();
+            
+            // Reset form
+            document.getElementById('appointmentForm').reset();
+            document.getElementById('selectedTimeInfo').classList.add('hidden');
+            document.getElementById('saveAppointmentBtn').disabled = true;
+            selectedTimeSlot = null;
+            
+            // Refresh time slots display
+            const selectedDate = document.getElementById('appointmentDate').value;
+            if (selectedDate) {
+                displayTimeSlots(selectedDate);
+            }
+            
+            // Show notification
+            showNotification(getTranslation('book-success', 'Appointment booked successfully!'));
+        }
+        
+        // Add time slot
+        function addTimeSlot(date, time) {
+            // Check if slot already exists
+            const existingSlot = timeSlots.find(slot => slot.date === date && slot.time === time);
+            
+            if (existingSlot) {
+                showNotification(getTranslation('slot-exists', 'This time slot already exists'), 'error');
+                return;
+            }
+            
+            // Create new time slot
+            const newSlot = {
+                id: generateId(),
+                date: date,
+                time: time,
+                available: true
+            };
+            
+            // Add to time slots array
+            timeSlots.push(newSlot);
+            
+            // Save to localStorage
+            saveDataToStorage();
+            
+            // Update UI
+            updateTimeSlotsList();
+            
+            // Show notification
+            showNotification(getTranslation('slot-added', 'Time slot added successfully!'));
+        }
+        
+        // Delete time slot
+        function deleteTimeSlot(slotId) {
+            // Check if there's an appointment for this slot
+            const hasAppointment = appointments.some(apt => 
+                apt.date === timeSlots.find(slot => slot.id === slotId).date && 
+                apt.time === timeSlots.find(slot => slot.id === slotId).time
+            );
+            
+            if (hasAppointment) {
+                showNotification(getTranslation('slot-has-appointment', 'Cannot delete a time slot with an existing appointment'), 'error');
+                return;
+            }
+            
+            // Remove from time slots array
+            timeSlots = timeSlots.filter(slot => slot.id !== slotId);
+            
+            // Save to localStorage
+            saveDataToStorage();
+            
+            // Update UI
+            updateTimeSlotsList();
+            
+            // Show notification
+            showNotification(getTranslation('slot-deleted', 'Time slot deleted successfully!'));
+        }
+        
+        // Update time slots list in dashboard
+        function updateTimeSlotsList() {
+            const timeSlotsList = document.getElementById('timeSlotsList');
+            
+            // Clear existing list
+            timeSlotsList.innerHTML = '';
+            
+            // Sort time slots by date and time
+            const sortedSlots = [...timeSlots].sort((a, b) => {
+                if (a.date !== b.date) {
+                    return new Date(a.date) - new Date(b.date);
+                }
+                return a.time.localeCompare(b.time);
+            });
+            
+            // Create list items
+            sortedSlots.forEach(slot => {
+                const dateObj = new Date(slot.date);
+                const formattedDate = dateObj.toLocaleDateString(currentLanguage === 'en' ? 'en-US' : currentLanguage === 'ar' ? 'ar-SA' : 'fr-FR', { 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                });
+                
+                const slotItem = document.createElement('div');
+                slotItem.className = 'flex justify-between items-center p-3 bg-gray-50 rounded-md';
+                slotItem.innerHTML = `
+                    <div>
+                        <span class="font-medium">${formattedDate}</span>
+                        <span class="mx-2">•</span>
+                        <span>${slot.time}</span>
+                        <span class="ml-2 px-2 py-1 text-xs rounded-full ${slot.available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${slot.available ? getTranslation('slot-available', 'Available') : getTranslation('slot-booked', 'Booked')}
+                        </span>
+                    </div>
+                    <button class="text-red-500 hover:text-red-700" onclick="deleteTimeSlot('${slot.id}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                timeSlotsList.appendChild(slotItem);
+            });
+        }
+        
+        // Add manual appointment
+        function addManualAppointment() {
+            const date = document.getElementById('manualDate').value;
+            const time = document.getElementById('manualTime').value;
+            const name = document.getElementById('manualName').value;
+            const phone = document.getElementById('manualPhone').value;
+            const visitType = document.getElementById('manualVisitType').value;
+            const notes = document.getElementById('manualNotes').value;
+            
+            // Create appointment object
+            const appointment = {
+                id: generateId(),
+                date: date,
+                time: time,
+                patientName: name,
+                patientPhone: phone,
+                visitType: visitType,
+                notes: notes,
+                source: 'manual',
+                createdAt: new Date().toISOString()
+            };
+            
+            // Add to appointments array
+            appointments.push(appointment);
+            
+            // Check if time slot exists, if not create it
+            const existingSlot = timeSlots.find(slot => slot.date === date && slot.time === time);
+            if (existingSlot) {
+                // Mark as unavailable
+                existingSlot.available = false;
+            } else {
+                // Create new slot and mark as unavailable
+                timeSlots.push({
+                    id: generateId(),
+                    date: date,
+                    time: time,
+                    available: false
+                });
+            }
+            
+            // Save to localStorage
+            saveDataToStorage();
+            
+            // Reset form
+            document.getElementById('manualAppointmentForm').reset();
+            
+            // Update UI
+            updateDashboard();
+            updateTimeSlotsList();
+            updateAppointmentsList();
+            
+            // Show notification
+            showNotification(getTranslation('appointment-added', 'Appointment added successfully!'));
+        }
+        
+        // Update appointments list in dashboard
+        function updateAppointmentsList() {
+            const appointmentsList = document.getElementById('appointmentsList');
+            const noAppointmentsMsg = document.getElementById('noAppointments');
+            
+            // Clear existing list
+            appointmentsList.innerHTML = '';
+            
+            if (appointments.length === 0) {
+                noAppointmentsMsg.classList.remove('hidden');
+                return;
+            }
+            
+            noAppointmentsMsg.classList.add('hidden');
+            
+            // Sort appointments by date and time
+            const sortedAppointments = [...appointments].sort((a, b) => {
+                if (a.date !== b.date) {
+                    return new Date(a.date) - new Date(b.date);
+                }
+                return a.time.localeCompare(b.time);
+            });
+            
+            // Create list items
+            sortedAppointments.forEach(appointment => {
+                const dateObj = new Date(appointment.date);
+                const formattedDate = dateObj.toLocaleDateString(currentLanguage === 'en' ? 'en-US' : currentLanguage === 'ar' ? 'ar-SA' : 'fr-FR', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric', 
+                    year: 'numeric' 
+                });
+                
+                const appointmentItem = document.createElement('div');
+                appointmentItem.className = 'appointment-card bg-gray-50 rounded-md p-4';
+                appointmentItem.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-user-circle text-blue-500 mr-2"></i>
+                                <h4 class="font-medium text-gray-800">${appointment.patientName}</h4>
+                                <span class="ml-2 px-2 py-1 text-xs rounded-full ${
+                                    appointment.source === 'website' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
+                                }">
+                                    ${appointment.source === 'website' ? getTranslation('source-website', 'Website') : getTranslation('source-manual', 'Manual')}
+                                </span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                                <div><i class="fas fa-calendar mr-1"></i> ${formattedDate}</div>
+                                <div><i class="fas fa-clock mr-1"></i> ${appointment.time}</div>
+                                <div><i class="fas fa-phone mr-1"></i> ${appointment.patientPhone}</div>
+                                <div><i class="fas fa-stethoscope mr-1"></i> ${
+                                    appointment.visitType === 'first' ? getTranslation('first-visit', 'First Visit') : getTranslation('follow-up', 'Follow-up')
+                                }</div>
+                            </div>
+                            ${appointment.notes ? `<div class="mt-2 text-sm text-gray-600"><i class="fas fa-sticky-note mr-1"></i> ${appointment.notes}</div>` : ''}
+                        </div>
+                        <button class="text-red-500 hover:text-red-700 ml-4" onclick="deleteAppointment('${appointment.id}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+                
+                appointmentsList.appendChild(appointmentItem);
+            });
+        }
+        
+        // Delete appointment
+        function deleteAppointment(appointmentId) {
+            // Find the appointment
+            const appointment = appointments.find(apt => apt.id === appointmentId);
+            
+            if (!appointment) {
+                return;
+            }
+            
+            // Remove from appointments array
+            appointments = appointments.filter(apt => apt.id !== appointmentId);
+            
+            // Update time slot availability
+            const slotIndex = timeSlots.findIndex(slot => 
+                slot.date === appointment.date && slot.time === appointment.time
+            );
+            
+            if (slotIndex !== -1) {
+                timeSlots[slotIndex].available = true;
+            }
+            
+            // Save to localStorage
+            saveDataToStorage();
+            
+            // Update UI
+            updateDashboard();
+            updateTimeSlotsList();
+            updateAppointmentsList();
+            
+            // Show notification
+            showNotification(getTranslation('appointment-deleted', 'Appointment deleted successfully!'));
+        }
+        
+        // Update dashboard statistics
+        function updateDashboard() {
+            // Total appointments
+            document.getElementById('totalAppointments').textContent = appointments.length;
+            
+            // Today's appointments
+            const today = new Date().toISOString().split('T')[0];
+            const todayAppointments = appointments.filter(apt => apt.date === today);
+            document.getElementById('todayAppointments').textContent = todayAppointments.length;
+            
+            // Available time slots
+            const availableSlots = timeSlots.filter(slot => slot.available);
+            document.getElementById('availableSlots').textContent = availableSlots.length;
+            
+            // Update appointments list
+            updateAppointmentsList();
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notificationMessage');
+            
+            notificationMessage.textContent = message;
+            
+            if (type === 'error') {
+                notification.style.backgroundColor = '#ef4444';
+            } else {
+                notification.style.backgroundColor = '#10b981';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
