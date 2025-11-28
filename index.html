@@ -124,6 +124,10 @@
             transition: background-color 0.3s ease;
         }
         
+        .btn-secondary:hover {
+            background-color: #4b5563;
+        }
+        
         .btn-danger {
             background-color: #ef4444;
             transition: background-color 0.3s ease;
@@ -291,7 +295,7 @@
                 <div class="grid md:grid-cols-2 gap-8 mb-8">
                     <!-- Doctor Image -->
                     <div class="flex justify-center">
-                        <img src="profile.png" alt="Dr. HAKIM BOURAS" class="rounded-lg shadow-lg w-full max-w-md h-auto object-cover">
+                        <img src="https://picsum.photos/seed/doctorprofile/600/600.jpg" alt="Dr. HAKIM BOURAS" class="rounded-lg shadow-lg w-full max-w-md h-auto object-cover">
                     </div>
                     
                     <!-- Doctor Information -->
@@ -343,7 +347,7 @@
                     <div class="text-center mb-6">
                         <i class="fas fa-user-md text-blue-500 text-4xl mb-3"></i>
                         <h2 class="text-2xl font-bold text-gray-800" data-translate="login-title">Doctor Login</h2>
-                        <p class="text-gray-600 mt-2" data-translate="login-subtitle">Enter your credentials to access the dashboard</p>
+                        <p class="text-gray-600 mt-2" data-translate="login-subtitle">Enter your credentials to access dashboard</p>
                     </div>
                     
                     <form id="loginForm">
@@ -499,6 +503,7 @@
                                         <label for="followUp" class="text-gray-600" data-translate="book-form-follow-up">Follow-up Visit (requested by doctor)</label>
                                     </div>
                                 </div>
+                            </div>
                             </div>
                             
                             <div class="mb-4">
@@ -679,7 +684,7 @@
                 "nav-book": "Book Appointment",
                 "doctor-login": "Doctor Login",
                 "login-title": "Doctor Login",
-                "login-subtitle": "Enter your credentials to access the dashboard",
+                "login-subtitle": "Enter your credentials to access dashboard",
                 "username": "Username",
                 "password": "Password",
                 "login-btn": "Login",
@@ -1034,7 +1039,7 @@
             } catch (error) {
                 console.error('Login error:', error);
                 // Fallback to local authentication for demo
-                if (username === 'Bouras' && password === '00000000') {
+                if (username === 'nour' && password === 'nounou358') {
                     authToken = 'demo-token';
                     localStorage.setItem('authToken', authToken);
                     isAuthenticated = true;
@@ -1291,7 +1296,7 @@
                     // Check if user typed "35"
                     if (value === '35') {
                         showPage('login');
-                        this.value = ''; // Clear the search input
+                        this.value = ''; // Clear search input
                         showNotification(getTranslation('search-login', 'Redirecting to login page...'));
                     }
                 });
@@ -1723,7 +1728,7 @@
         
         // Delete appointment
         function deleteAppointment(appointmentId) {
-            // Find the appointment
+            // Find appointment
             const appointment = appointments.find(apt => apt.id === appointmentId);
             
             if (!appointment) {
@@ -1793,5 +1798,4 @@
         }
     </script>
 </body>
-
 </html>
